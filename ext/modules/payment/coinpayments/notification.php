@@ -44,7 +44,7 @@ if (
         $host_hash = array_shift($invoice_str);
         $invoice_id = array_shift($invoice_str);
 
-        if ($host_hash == md5(md5(tep_href_link('index.php', '', 'SSL', false, false)))) {
+        if ($host_hash == md5(tep_href_link('index.php', '', 'SSL', false, false))) {
             $display_value = $request_data['invoice']['amount']['displayValue'];
             $trans_id = $request_data['invoice']['id'];
 
