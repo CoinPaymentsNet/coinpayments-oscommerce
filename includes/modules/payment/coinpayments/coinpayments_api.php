@@ -20,6 +20,10 @@ class coinpayments_api
     const API_CHECKOUT_ACTION = 'checkout';
     const FIAT_TYPE = 'fiat';
 
+    const PAID_EVENT = 'Paid';
+    const CANCELLED_EVENT = 'Cancelled';
+    const PENDING_EVENT = 'Pending';
+
     const WEBHOOK_NOTIFICATION_URL = 'ext/modules/payment/coinpayments/notification.php';
 
     /**
@@ -29,20 +33,16 @@ class coinpayments_api
      * @return bool|mixed
      * @throws Exception
      */
-    public function createWebHook($client_id, $client_secret)
+    public function createWebHook($client_id, $client_secret, $event)
     {
 
         $action = sprintf(self::API_WEBHOOK_ACTION, $client_id);
 
         $params = array(
-            "notificationsUrl" => $this->getNotificationUrl(),
-            "notifications" => array(
-                "invoiceCreated",
-                "invoicePending",
-                "invoicePaid",
-                "invoiceCompleted",
-                "invoiceCancelled",
-            ),
+            "notificationsUrl" => $this->getNotificationUrl($client_id, $event),
+            "notifications" => [
+                sprintf("invoice%s", $event)
+            ],
         );
 
         return $this->sendRequest('POST', $action, $client_id, $params, $client_secret);
@@ -153,9 +153,9 @@ class coinpayments_api
     /**
      * @return string
      */
-    public function getNotificationUrl()
+    public function getNotificationUrl($client_id, $event)
     {
-        return tep_href_link(static::WEBHOOK_NOTIFICATION_URL, '', 'SSL', false, false);
+        return tep_href_link(static::WEBHOOK_NOTIFICATION_URL, 'clientId='.$client_id . '&event='.$event, 'SSL', false, false);
     }
 
     /**
@@ -173,10 +173,10 @@ class coinpayments_api
      * @param $content
      * @return bool
      */
-    public function checkDataSignature($signature, $content)
+    public function checkDataSignature($signature, $content, $event)
     {
 
-        $request_url = $this->getNotificationUrl();
+        $request_url = $this->getNotificationUrl(MODULE_PAYMENT_COINPAYMENTS_CLIENT_ID, $event);
         $client_secret = MODULE_PAYMENT_COINPAYMENTS_CLIENT_SECRET;
         $signature_string = sprintf('%s%s', $request_url, $content);
         $encoded_pure = $this->encodeSignatureString($signature_string, $client_secret);
