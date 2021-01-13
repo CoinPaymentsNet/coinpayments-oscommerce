@@ -37,7 +37,7 @@ if (
     $content = file_get_contents('php://input');
     $request_data = json_decode($content, true);
 
-    if ($api->checkDataSignature($signature, $content) && isset($request_data['invoice']['invoiceId'])) {
+    if ($api->checkDataSignature($signature, $content, $request_data['invoice']['status']) && isset($request_data['invoice']['invoiceId'])) {
 //
         $invoice_str = $request_data['invoice']['invoiceId'];
         $invoice_str = explode('|', $invoice_str);
@@ -54,7 +54,8 @@ if (
                 $order = tep_db_fetch_array($order_query);
                 if ($order) {
                     $status = $request_data['invoice']['status'];
-                    if ($status == 'Completed') {
+                    $completed_statuses = array(coinpayments_api::PAID_EVENT, coinpayments_api::PENDING_EVENT);
+                    if (in_array($status, $completed_statuses)) {
 
                         $total_query = tep_db_query("select value from " . TABLE_ORDERS_TOTAL . " where orders_id = '" . (int)$invoice_id . "' and class = 'ot_total' limit 1");
                         $total = tep_db_fetch_array($total_query);

@@ -75,8 +75,10 @@ class coinpayments
                         }, $webhooks_list['items']);
                     }
 
-                    if (!in_array($this->api->getNotificationUrl(), $webhooks_urls_list)) {
-                        $this->api->createWebHook(MODULE_PAYMENT_COINPAYMENTS_CLIENT_ID, MODULE_PAYMENT_COINPAYMENTS_CLIENT_SECRET);
+                    if (!in_array($this->api->getNotificationUrl(MODULE_PAYMENT_COINPAYMENTS_CLIENT_ID, coinpayments_api::CANCELLED_EVENT), $webhooks_urls_list) || !in_array($this->api->getNotificationUrl(MODULE_PAYMENT_COINPAYMENTS_CLIENT_ID,coinpayments_api::PAID_EVENT), $webhooks_urls_list) || !in_array($this->api->getNotificationUrl(MODULE_PAYMENT_COINPAYMENTS_CLIENT_ID,coinpayments_api::PENDING_EVENT), $webhooks_urls_list)) {
+                        $this->api->createWebHook(MODULE_PAYMENT_COINPAYMENTS_CLIENT_ID, MODULE_PAYMENT_COINPAYMENTS_CLIENT_SECRET, coinpayments_api::CANCELLED_EVENT);
+                        $this->api->createWebHook(MODULE_PAYMENT_COINPAYMENTS_CLIENT_ID, MODULE_PAYMENT_COINPAYMENTS_CLIENT_SECRET, coinpayments_api::PAID_EVENT);
+                        $this->api->createWebHook(MODULE_PAYMENT_COINPAYMENTS_CLIENT_ID, MODULE_PAYMENT_COINPAYMENTS_CLIENT_SECRET, coinpayments_api::PENDING_EVENT);
                     }
                 }
             }
