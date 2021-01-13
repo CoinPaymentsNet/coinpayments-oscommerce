@@ -52,7 +52,7 @@ class coinpayments
 
         $this->api = new coinpayments_api();
 
-        $this->form_action_url = sprintf('%s/%s/', coinpayments_api::API_URL, coinpayments_api::API_CHECKOUT_ACTION);
+        $this->form_action_url = sprintf('%s/%s/', coinpayments_api::CHECKOUT_URL, coinpayments_api::API_CHECKOUT_ACTION);
 
         try {
             if (
@@ -137,10 +137,8 @@ class coinpayments
 
                 $curr_check = tep_db_query("select currency from " . TABLE_ORDERS . " where orders_id = '" . (int)$order_id . "'");
                 $curr = tep_db_fetch_array($curr_check);
-
                 if (($curr['currency'] != $order->info['currency']) || ($cartID != substr($cart_CoinPayments_Standard_ID, 0, strlen($cartID)))) {
                     $check_query = tep_db_query('select orders_id from ' . TABLE_ORDERS_STATUS_HISTORY . ' where orders_id = "' . (int)$order_id . '" limit 1');
-
                     if (tep_db_num_rows($check_query) < 1) {
                         tep_db_query('delete from ' . TABLE_ORDERS . ' where orders_id = "' . (int)$order_id . '"');
                         tep_db_query('delete from ' . TABLE_ORDERS_TOTAL . ' where orders_id = "' . (int)$order_id . '"');
@@ -353,6 +351,16 @@ EOD;
 
     public function before_process()
     {
+        tep_session_unregister('sendto');
+        tep_session_unregister('billto');
+        tep_session_unregister('shipping');
+        tep_session_unregister('payment');
+        tep_session_unregister('comments');
+
+        tep_session_unregister('cart_CoinPayments_Standard_ID');
+
+
+        tep_redirect(tep_href_link(FILENAME_CHECKOUT_SUCCESS, '', 'SSL'));
         return false;
     }
 
