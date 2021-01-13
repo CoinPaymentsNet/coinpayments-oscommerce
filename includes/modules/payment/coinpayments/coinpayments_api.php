@@ -63,7 +63,7 @@ class coinpayments_api
         $action = self::API_SIMPLE_INVOICE_ACTION;
 
         $hostname = tep_href_link('index.php', '', 'SSL', false, false);
-        $notes = sprintf("%s / Store name: %s / Order # %s",$hostname,STORE_NAME,explode('|', $invoice_id)[1]);
+        $notesToRecipient = sprintf("%s / Store name: %s / Order # %s",$hostname,STORE_NAME,explode('|', $invoice_id)[1]);
 
         $params = array(
             'clientId' => $client_id,
@@ -73,7 +73,7 @@ class coinpayments_api
                 "displayValue" => $display_value,
                 'value' => $amount
             ),
-            "notes" => $notes
+            "notesToRecipient" => $notesToRecipient
         );
 
         $params = $this->appendInvoiceMetadata($params);
