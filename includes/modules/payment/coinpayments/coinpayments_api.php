@@ -57,7 +57,7 @@ class coinpayments_api
      * @return bool|mixed
      * @throws Exception
      */
-    public function createSimpleInvoice($client_id, $currency_id = 5057, $invoice_id = 'Validate invoice', $amount = 1, $display_value = '0.01')
+    public function createSimpleInvoice($client_id, $currency_id = 5057, $invoice_id = 'Validate invoice', $amount = 1, $display_value = '0.01', $billing_data)
     {
 
         $action = self::API_SIMPLE_INVOICE_ACTION;
@@ -75,7 +75,7 @@ class coinpayments_api
             ),
             "notesToRecipient" => $notesToRecipient
         );
-
+        $params = $this->append_billing_data($params, $billing_data);
         $params = $this->appendInvoiceMetadata($params);
         return $this->sendRequest('POST', $action, $client_id, $params);
     }
@@ -90,7 +90,7 @@ class coinpayments_api
      * @return bool|mixed
      * @throws Exception
      */
-    public function createMerchantInvoice($client_id, $client_secret, $currency_id, $invoice_id, $amount, $display_value)
+    public function createMerchantInvoice($client_id, $client_secret, $currency_id, $invoice_id, $amount, $display_value, $billing_data)
     {
 
         $action = self::API_MERCHANT_INVOICE_ACTION;
@@ -108,8 +108,21 @@ class coinpayments_api
             "notes" => $notes
         );
 
+        $params = $this->append_billing_data($params, $billing_data);
         $params = $this->appendInvoiceMetadata($params);
         return $this->sendRequest('POST', $action, $client_id, $params, $client_secret);
+    }
+
+    function append_billing_data($request_data, $billing_data)
+    {
+        $request_data['buyer'] = array(
+            "companyName" => $billing_data['company'],
+            "name" => array(
+                "firstName" => $billing_data['firstname'],
+                "lastName" => $billing_data['lastname']
+            ),
+        );
+        return $request_data;
     }
 
     /**
