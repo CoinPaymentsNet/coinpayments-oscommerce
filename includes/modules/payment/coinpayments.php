@@ -319,10 +319,10 @@ class coinpayments
             $display_value = $order->info['total'];
 
             if (MODULE_PAYMENT_COINPAYMENTS_WEBHOOK == 'Yes') {
-                $resp = $this->api->createMerchantInvoice($client_id, $client_secret, $coin_currency['id'], $invoice_id, $amount, $display_value);
+                $resp = $this->api->createMerchantInvoice($client_id, $client_secret, $coin_currency['id'], $invoice_id, $amount, $display_value, $order->billing);
                 $invoice = array_shift($resp['invoices']);
             } else {
-                $invoice = $this->api->createSimpleInvoice($client_id, $coin_currency['id'], $invoice_id, $amount, $display_value);
+                $invoice = $this->api->createSimpleInvoice($client_id, $coin_currency['id'], $invoice_id, $amount, $display_value, $order->billing);
             }
 
             $parameters = array(
