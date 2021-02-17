@@ -19,5 +19,4 @@
 
   define('MODULE_PAYMENT_COINPAYMENTS_TEXT_TITLE', 'CoinPayments.net Bitcoin/Litecoin/Other Payments');
   define('MODULE_PAYMENT_COINPAYMENTS_TEXT_PUBLIC_TITLE', 'CoinPayments - Bitcoin, Litecoin, and other cryptocurrencies');
-  define('MODULE_PAYMENT_COINPAYMENTS_TEXT_DESCRIPTION', 'CoinPayments - Bitcoin, Litecoin, and other cryptocurrencies');
 ?>

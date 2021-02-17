@@ -29,7 +29,12 @@ class coinpayments
         $this->code = 'coinpayments';
         $this->title = MODULE_PAYMENT_COINPAYMENTS_TEXT_TITLE;
         $this->public_title = MODULE_PAYMENT_COINPAYMENTS_TEXT_PUBLIC_TITLE;
-        $this->description = MODULE_PAYMENT_COINPAYMENTS_TEXT_DESCRIPTION;
+        $coinpayments_link = sprintf(
+            '<a href="%s" target="_blank" style="text-decoration: underline; font-weight: bold;" title="CoinPayments.net">CoinPayments.net</a>',
+            'https://alpha.coinpayments.net/'
+        );
+        $coin_description = 'Pay with Bitcoin, Litecoin, or other altcoins via ';
+        $this->description = sprintf('%s<br/>%s', $coin_description, $coinpayments_link);
         $this->sort_order = defined('MODULE_PAYMENT_COINPAYMENTS_SORT_ORDER') ? MODULE_PAYMENT_COINPAYMENTS_SORT_ORDER : 0;
 
         if (defined('MODULE_PAYMENT_COINPAYMENTS_STATUS')) {
