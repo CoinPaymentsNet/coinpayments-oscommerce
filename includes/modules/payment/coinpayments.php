@@ -323,11 +323,20 @@ class coinpayments
             $amount = number_format($order->info['total'], $coin_currency['decimalPlaces'], '', '');;
             $display_value = $order->info['total'];
 
+            $invoice_params = array(
+                'invoice_id' => $invoice_id,
+                'currency_id' => $coin_currency['id'],
+                'amount' => $amount,
+                'display_value' => $display_value,
+                'billing_data' => $order->billing,
+                'notes_link' => tep_href_link('admin/orders.php' . "?" . 'oID=' . $order_id . '&action=edit', '', 'SSL', false, false),
+            );
+
             if (MODULE_PAYMENT_COINPAYMENTS_WEBHOOK == 'Yes') {
-                $resp = $this->api->createMerchantInvoice($client_id, $client_secret, $coin_currency['id'], $invoice_id, $amount, $display_value, $order->billing);
+                $resp = $this->api->createMerchantInvoice($client_id, $client_secret, $invoice_params);
                 $invoice = array_shift($resp['invoices']);
             } else {
-                $invoice = $this->api->createSimpleInvoice($client_id, $coin_currency['id'], $invoice_id, $amount, $display_value, $order->billing);
+                $invoice = $this->api->createSimpleInvoice($client_id, $invoice_params);
             }
 
             $parameters = array(
