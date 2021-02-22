@@ -110,6 +110,18 @@ class coinpayments_api
                 "lastName" => $billing_data['lastname']
             ),
         );
+        if (preg_match('/^([A-Z]{2})$/', $billing_data['country']['iso_code_2'])
+        && !empty($billing_data['street_address'])
+            && !empty($billing_data['city'])
+        ) {
+            $request_data['buyer']['address'] = array(
+                'address1' => $billing_data['street_address'],
+                'provinceOrState' => $billing_data['state'],
+                'city' => $billing_data['city'],
+                'countryCode' => $billing_data['country']['iso_code_2'],
+                'postalCode' => $billing_data['postcode'],
+            );
+        }
         return $request_data;
     }
 
