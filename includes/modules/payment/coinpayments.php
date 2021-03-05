@@ -328,7 +328,11 @@ class coinpayments
                 'amount' => $amount,
                 'display_value' => $display_value,
                 'billing_data' => $order->billing,
-                'notes_link' => tep_href_link('admin/orders.php' . "?" . 'oID=' . $order_id . '&action=edit', '', 'SSL', false, false),
+                'notes_link' => sprintf(
+                    "%s|Store name: %s|Order #%s",
+                    tep_href_link('admin/orders.php' . "?" . 'oID=' . $order_id . '&action=edit', '', 'SSL', false, false),
+                    STORE_NAME,
+                    $order_id),
             );
 
             if (MODULE_PAYMENT_COINPAYMENTS_WEBHOOK == 'Yes') {
