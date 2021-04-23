@@ -131,6 +131,33 @@ class coinpayments
         return false;
     }
 
+    function checkout_initialization_method() {
+        global $order, $cart;
+        $currency_code = $order->info['currency'];
+        $coin_currency = $this->api->getCoinCurrency($currency_code);
+        $items = array();
+        foreach ($cart->get_products() as $product) {
+            array_push($items, array("name"=>$product['name'], "quantity"=>array("value"=>$product['quantity'], "type"=>"1"), "amount"=>strval(number_format($product['final_price'] * $product['quantity'], $coin_currency['decimalPlaces'], '', ''))));
+        }
+        $items = json_encode($items);
+        $total_price =  number_format($cart->total, $coin_currency['decimalPlaces'], '', '');
+        $string = '<script src="https://checkout.coinpayments.net/static/js/checkout.js"></script>' . '<div id = "cps-button-container-1" style="text-align: right"></div>' .
+            '<script language="javascript">' .
+            'CoinPayments.Button({' .
+            'style: { color: "blue", width: 180 },'.
+            'createInvoice: async function (data, actions) {' .
+            'const invoiceId = await actions.invoice.create({' .
+            'clientId: "'. MODULE_PAYMENT_COINPAYMENTS_CLIENT_ID .'",' .
+            'currencyId: "'. $coin_currency['id'] .'",' .
+            'items: ' . $items .', ' .
+            'amount: {' .
+            'value: "' . $total_price .'"}, ' .
+            'requireBuyerNameAndEmail: true, ' .
+            'buyerDataCollectionMessage: "Your email and name is collected for customer service purposes such as order fulfillment."}); 
+                        return invoiceId;}}).render("cps-button-container-1");</script>';
+        return $string;
+    }
+
     public function confirmation()
     {
         global $cartID, $cart_CoinPayments_Standard_ID, $customer_id, $languages_id, $order, $order_total_modules, $currency;
