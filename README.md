@@ -11,27 +11,6 @@ In no event will CoinPayments Inc. or its directors, officers, employees, shareh
 ## **Note**
 Download the link here: https://github.com/CoinPaymentsNet/coinpayments-oscommerce/releases/tag/v2.0.0
 
-# Coin Payments Module
-## Install the Module
--------------------------------------------------------
-This module should be used with osCommerce 2.3.4
--------------------------------------------------------
-Installation Instructions
-
-1. Copy the contents of the folder you have unzipped to the root directory of your shop.
-
-2. Login to admin and in Modules->Payment you will see '+ Install Module (n)'.
-
-4. Click on '+ Install Module (n)'.
-
-3. Click on 'CoinPayments - Bitcoin, Litecoin' to highlight the module and click on 'Install'.
-
-4. Insert the Client ID to create invoices.
-
-5. Enable Webhooks and insert Client Secret given to you from Coinpayments.net
-
-6. Click 'Save' to submit your configuration. 
-
 # Follow the steps below to download this plugin:
   
 1. Log into your https://alpha.coinpayments.net/ account
