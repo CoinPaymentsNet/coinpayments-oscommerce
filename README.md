@@ -31,3 +31,12 @@ Installation Instructions
 5. Enable Webhooks and insert Client Secret given to you from Coinpayments.net
 
 6. Click 'Save' to submit your configuration. 
+
+# Follow the steps below to download this plugin:
+  
+1. Log into your https://alpha.coinpayments.net/ account
+2. Click on Business Tools -> Intergrations -> Pre-built Plugins -> + add Intergration button
+3. Select this plug-in from the dropdown menu
+4. Click the download plugin button  
+   
+![Screenshot 2021-04-26 042246](https://user-images.githubusercontent.com/72504315/116074859-234bef80-a647-11eb-975d-2a45abf1744d.png)
