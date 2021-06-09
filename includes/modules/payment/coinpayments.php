@@ -355,6 +355,7 @@ class coinpayments
                 'amount' => $amount,
                 'display_value' => $display_value,
                 'billing_data' => $order->billing,
+                'email_address' => $order->customer["email_address"],
                 'notes_link' => sprintf(
                     "%s|Store name: %s|Order #%s",
                     tep_href_link('admin/orders.php' . "?" . 'oID=' . $order_id . '&action=edit', '', 'SSL', false, false),

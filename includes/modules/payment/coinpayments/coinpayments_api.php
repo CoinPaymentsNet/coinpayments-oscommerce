@@ -66,9 +66,10 @@ class coinpayments_api
                 "displayValue" => $invoice_params['display_value'],
                 'value' => $invoice_params['amount']
             ),
+            'requireBuyerNameAndEmail' => true,
             "notesToRecipient" => $invoice_params['notes_link']
         );
-        $params = $this->append_billing_data($params, $invoice_params['billing_data']);
+        $params = $this->append_billing_data($params, $invoice_params['billing_data'], $invoice_params['email_address']);
         $params = $this->appendInvoiceMetadata($params);
         return $this->sendRequest('POST', $action, $client_id, $params);
     }
@@ -92,15 +93,16 @@ class coinpayments_api
                 "displayValue" => $invoice_params['display_value'],
                 "value" => $invoice_params['amount']
             ),
+            'requireBuyerNameAndEmail' => true,
             "notesToRecipient" => $invoice_params['notes_link']
         );
 
-        $params = $this->append_billing_data($params, $invoice_params['billing_data']);
+        $params = $this->append_billing_data($params, $invoice_params['billing_data'], $invoice_params['email_address']);
         $params = $this->appendInvoiceMetadata($params);
         return $this->sendRequest('POST', $action, $client_id, $params, $client_secret);
     }
 
-    function append_billing_data($request_data, $billing_data)
+    function append_billing_data($request_data, $billing_data, $email_address)
     {
         $request_data['buyer'] = array(
             "companyName" => $billing_data['company'],
@@ -109,6 +111,9 @@ class coinpayments_api
                 "lastName" => $billing_data['lastname']
             ),
         );
+        if (preg_match('/^.*@.*$/', $email_address)) {
+            $request_data['buyer']['emailAddress'] = $email_address;
+        }
         if (preg_match('/^([A-Z]{2})$/', $billing_data['country']['iso_code_2'])
         && !empty($billing_data['street_address'])
             && !empty($billing_data['city'])
