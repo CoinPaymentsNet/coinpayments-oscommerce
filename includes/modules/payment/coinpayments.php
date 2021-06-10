@@ -58,36 +58,6 @@ class coinpayments
         $this->api = new coinpayments_api();
 
         $this->form_action_url = sprintf('%s/%s/', coinpayments_api::CHECKOUT_URL, coinpayments_api::API_CHECKOUT_ACTION);
-
-        try {
-            if (
-                $this->enabled &&
-                defined('MODULE_PAYMENT_COINPAYMENTS_CLIENT_ID') &&
-                defined('MODULE_PAYMENT_COINPAYMENTS_WEBHOOK') &&
-                defined('MODULE_PAYMENT_COINPAYMENTS_CLIENT_SECRET') &&
-                !empty(MODULE_PAYMENT_COINPAYMENTS_CLIENT_ID) &&
-                MODULE_PAYMENT_COINPAYMENTS_WEBHOOK == 'Yes' &&
-                !empty(MODULE_PAYMENT_COINPAYMENTS_CLIENT_SECRET)
-            ) {
-
-                $webhooks_list = $this->api->getWebhooksList(MODULE_PAYMENT_COINPAYMENTS_CLIENT_ID, MODULE_PAYMENT_COINPAYMENTS_CLIENT_SECRET);
-
-                if (!empty($webhooks_list)) {
-                    $webhooks_urls_list = array();
-                    if (!empty($webhooks_list['items'])) {
-                        $webhooks_urls_list = array_map(function ($webHook) {
-                            return $webHook['notificationsUrl'];
-                        }, $webhooks_list['items']);
-                    }
-
-                    if (!in_array($this->api->getNotificationUrl(MODULE_PAYMENT_COINPAYMENTS_CLIENT_ID, coinpayments_api::CANCELLED_EVENT), $webhooks_urls_list) || !in_array($this->api->getNotificationUrl(MODULE_PAYMENT_COINPAYMENTS_CLIENT_ID,coinpayments_api::PAID_EVENT), $webhooks_urls_list)) {
-                        $this->api->createWebHook(MODULE_PAYMENT_COINPAYMENTS_CLIENT_ID, MODULE_PAYMENT_COINPAYMENTS_CLIENT_SECRET, coinpayments_api::CANCELLED_EVENT);
-                        $this->api->createWebHook(MODULE_PAYMENT_COINPAYMENTS_CLIENT_ID, MODULE_PAYMENT_COINPAYMENTS_CLIENT_SECRET, coinpayments_api::PAID_EVENT);
-                    }
-                }
-            }
-        } catch (Exception $e) {
-        }
     }
 
     public function update_status()
@@ -417,7 +387,42 @@ EOD;
 
     public function check()
     {
-        return defined('MODULE_PAYMENT_COINPAYMENTS_STATUS');
+
+        if(defined('MODULE_PAYMENT_COINPAYMENTS_STATUS')){
+
+            try {
+                if (
+                    $this->enabled &&
+                    defined('MODULE_PAYMENT_COINPAYMENTS_CLIENT_ID') &&
+                    defined('MODULE_PAYMENT_COINPAYMENTS_WEBHOOK') &&
+                    defined('MODULE_PAYMENT_COINPAYMENTS_CLIENT_SECRET') &&
+                    !empty(MODULE_PAYMENT_COINPAYMENTS_CLIENT_ID) &&
+                    MODULE_PAYMENT_COINPAYMENTS_WEBHOOK == 'Yes' &&
+                    !empty(MODULE_PAYMENT_COINPAYMENTS_CLIENT_SECRET)
+                ) {
+
+                    $webhooks_list = $this->api->getWebhooksList(MODULE_PAYMENT_COINPAYMENTS_CLIENT_ID, MODULE_PAYMENT_COINPAYMENTS_CLIENT_SECRET);
+
+                    if (!empty($webhooks_list)) {
+                        $webhooks_urls_list = array();
+                        if (!empty($webhooks_list['items'])) {
+                            $webhooks_urls_list = array_map(function ($webHook) {
+                                return $webHook['notificationsUrl'];
+                            }, $webhooks_list['items']);
+                        }
+
+                        if (!in_array($this->api->getNotificationUrl(MODULE_PAYMENT_COINPAYMENTS_CLIENT_ID, coinpayments_api::CANCELLED_EVENT), $webhooks_urls_list) || !in_array($this->api->getNotificationUrl(MODULE_PAYMENT_COINPAYMENTS_CLIENT_ID,coinpayments_api::PAID_EVENT), $webhooks_urls_list)) {
+                            $this->api->createWebHook(MODULE_PAYMENT_COINPAYMENTS_CLIENT_ID, MODULE_PAYMENT_COINPAYMENTS_CLIENT_SECRET, coinpayments_api::CANCELLED_EVENT);
+                            $this->api->createWebHook(MODULE_PAYMENT_COINPAYMENTS_CLIENT_ID, MODULE_PAYMENT_COINPAYMENTS_CLIENT_SECRET, coinpayments_api::PAID_EVENT);
+                        }
+                    }
+                }
+            } catch (Exception $e) {
+            }
+
+            return true;
+        }
+        return false;
     }
 
     public function install($parameter = null)
