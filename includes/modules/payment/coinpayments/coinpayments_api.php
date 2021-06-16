@@ -183,7 +183,7 @@ class coinpayments_api
         } else {
             $notification_url = tep_href_link(static::WEBHOOK_NOTIFICATION_URL, 'clientId=' . $client_id . '&event=' . $event, 'SSL', false, false);
         }
-        return $notification_url;
+        return htmlspecialchars_decode($notification_url);
     }
 
     /**
