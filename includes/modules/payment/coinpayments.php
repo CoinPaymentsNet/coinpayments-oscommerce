@@ -368,14 +368,15 @@ EOD;
 
     public function before_process()
     {
+        global $cart;
+
+        $cart->reset(true);
         tep_session_unregister('sendto');
         tep_session_unregister('billto');
         tep_session_unregister('shipping');
         tep_session_unregister('payment');
         tep_session_unregister('comments');
-
         tep_session_unregister('cart_CoinPayments_Standard_ID');
-
 
         tep_redirect(tep_href_link(FILENAME_CHECKOUT_SUCCESS, '', 'SSL'));
         return false;
