@@ -68,7 +68,11 @@ class coinpayments_api
             ),
             "notesToRecipient" => $invoice_params['notes_link']
         );
-        $params = $this->append_billing_data($params, $invoice_params['billing_data']);
+
+        if (isset($invoice_params['billing_data']) && isset($invoice_params['email_address'])) {
+            $params = $this->append_billing_data($params, $invoice_params['billing_data'], $invoice_params['email_address']);
+        }
+
         $params = $this->appendInvoiceMetadata($params);
         return $this->sendRequest('POST', $action, $client_id, $params);
     }
@@ -95,12 +99,15 @@ class coinpayments_api
             "notesToRecipient" => $invoice_params['notes_link']
         );
 
-        $params = $this->append_billing_data($params, $invoice_params['billing_data']);
+        if (isset($invoice_params['billing_data']) && isset($invoice_params['email_address'])) {
+            $params = $this->append_billing_data($params, $invoice_params['billing_data'], $invoice_params['email_address']);
+        }
+
         $params = $this->appendInvoiceMetadata($params);
         return $this->sendRequest('POST', $action, $client_id, $params, $client_secret);
     }
 
-    function append_billing_data($request_data, $billing_data)
+    function append_billing_data($request_data, $billing_data, $email_address)
     {
         $request_data['buyer'] = array(
             "companyName" => $billing_data['company'],
@@ -109,6 +116,9 @@ class coinpayments_api
                 "lastName" => $billing_data['lastname']
             ),
         );
+        if (preg_match('/^.*@.*$/', $email_address)) {
+            $request_data['buyer']['emailAddress'] = $email_address;
+        }
         if (preg_match('/^([A-Z]{2})$/', $billing_data['country']['iso_code_2'])
         && !empty($billing_data['street_address'])
             && !empty($billing_data['city'])
@@ -175,7 +185,12 @@ class coinpayments_api
      */
     public function getNotificationUrl($client_id, $event)
     {
-        return tep_href_link(static::WEBHOOK_NOTIFICATION_URL, 'clientId='.$client_id . '&event='.$event, 'SSL', false, false);
+        if (function_exists('tep_catalog_href_link')) {
+            $notification_url = tep_catalog_href_link(static::WEBHOOK_NOTIFICATION_URL, 'clientId=' . $client_id . '&event=' . $event, 'SSL');
+        } else {
+            $notification_url = tep_href_link(static::WEBHOOK_NOTIFICATION_URL, 'clientId=' . $client_id . '&event=' . $event, 'SSL', false, false);
+        }
+        return htmlspecialchars_decode($notification_url);
     }
 
     /**
@@ -229,11 +244,6 @@ class coinpayments_api
      */
     protected function createSignature($method, $api_url, $client_id, $date, $client_secret, $params)
     {
-
-        if (!empty($params)) {
-            $params = json_encode($params);
-        }
-
         $signature_data = array(
             chr(239),
             chr(187),
@@ -241,9 +251,12 @@ class coinpayments_api
             $method,
             $api_url,
             $client_id,
-            $date->format('c'),
-            $params
+            $date->format('Y-m-d\TH:i:s')
         );
+
+        if (!empty($params)) {
+            $signature_data[] = json_encode($params);
+        }
 
         $signature_string = implode('', $signature_data);
 
@@ -291,7 +304,7 @@ class coinpayments_api
             if ($client_secret) {
                 $signature = $this->createSignature($method, $api_url, $client_id, $date, $client_secret, $params);
                 $headers[] = 'X-CoinPayments-Client: ' . $client_id;
-                $headers[] = 'X-CoinPayments-Timestamp: ' . $date->format('c');
+                $headers[] = 'X-CoinPayments-Timestamp: ' . $date->format('Y-m-d\TH:i:s');
                 $headers[] = 'X-CoinPayments-Signature: ' . $signature;
 
             }
