@@ -1,15 +1,12 @@
 <?php
 
-use OSC\OM\OSCOM;
+namespace CoinPayments;
 
+use Exception;
 
-/**
- * Class coinpayments_api
- */
-class coinpayments_api
+class ApiHelper
 {
-
-    const API_URL = 'https://api.coinpayments.net';
+    const API_URL = 'https://api-staging.coinpaymints.com';
     const CHECKOUT_URL = 'https://checkout.coinpayments.net';
     const API_VERSION = '1';
 
@@ -68,7 +65,11 @@ class coinpayments_api
             ),
             "notesToRecipient" => $invoice_params['notes_link']
         );
-        $params = $this->append_billing_data($params, $invoice_params['billing_data'], $invoice_params['email_address']);
+
+        if (isset($invoice_params['billing_data']) && isset($invoice_params['email_address'])) {
+            $params = $this->append_billing_data($params, $invoice_params['billing_data'], $invoice_params['email_address']);
+        }
+
         $params = $this->appendInvoiceMetadata($params);
         return $this->sendRequest('POST', $action, $client_id, $params);
     }
@@ -95,8 +96,12 @@ class coinpayments_api
             "notesToRecipient" => $invoice_params['notes_link']
         );
 
-        $params = $this->append_billing_data($params, $invoice_params['billing_data'], $invoice_params['email_address']);
+        if (isset($invoice_params['billing_data']) && isset($invoice_params['email_address'])) {
+            $params = $this->append_billing_data($params, $invoice_params['billing_data'], $invoice_params['email_address']);
+        }
+
         $params = $this->appendInvoiceMetadata($params);
+
         return $this->sendRequest('POST', $action, $client_id, $params, $client_secret);
     }
 
@@ -113,7 +118,7 @@ class coinpayments_api
             $request_data['buyer']['emailAddress'] = $email_address;
         }
         if (preg_match('/^([A-Z]{2})$/', $billing_data['country']['iso_code_2'])
-        && !empty($billing_data['street_address'])
+            && !empty($billing_data['street_address'])
             && !empty($billing_data['city'])
         ) {
             $request_data['buyer']['address'] = array(
@@ -127,11 +132,6 @@ class coinpayments_api
         return $request_data;
     }
 
-    /**
-     * @param string $name
-     * @return mixed
-     * @throws Exception
-     */
     public function getCoinCurrency($name)
     {
 
@@ -178,11 +178,13 @@ class coinpayments_api
      */
     public function getNotificationUrl($client_id, $event)
     {
+        $urlParams = sprintf('clientId=%s&event=%s', $client_id, $event);
         if (function_exists('tep_catalog_href_link')) {
-            $notification_url = tep_catalog_href_link(static::WEBHOOK_NOTIFICATION_URL, 'clientId=' . $client_id . '&event=' . $event, 'SSL');
+            $notification_url = tep_catalog_href_link(static::WEBHOOK_NOTIFICATION_URL, $urlParams, 'SSL');
         } else {
-            $notification_url = tep_href_link(static::WEBHOOK_NOTIFICATION_URL, 'clientId=' . $client_id . '&event=' . $event, 'SSL', false, false);
+            $notification_url = tep_href_link(static::WEBHOOK_NOTIFICATION_URL, $urlParams, 'SSL', false, false);
         }
+
         return htmlspecialchars_decode($notification_url);
     }
 
@@ -220,7 +222,7 @@ class coinpayments_api
 
         $hostname = tep_href_link('index.php', '', 'SSL', false, false);
         $request_data['metadata'] = array(
-            "integration" => sprintf("OSCommerce_v%s", tep_get_version()),
+            "integration" => PROJECT_VERSION,
             "hostname" => $hostname,
         );
         return $request_data;
@@ -237,11 +239,6 @@ class coinpayments_api
      */
     protected function createSignature($method, $api_url, $client_id, $date, $client_secret, $params)
     {
-
-        if (!empty($params)) {
-            $params = json_encode($params);
-        }
-
         $signature_data = array(
             chr(239),
             chr(187),
@@ -249,9 +246,12 @@ class coinpayments_api
             $method,
             $api_url,
             $client_id,
-            $date->format('c'),
-            $params
+            $date->format('Y-m-d\TH:i:s')
         );
+
+        if (!empty($params)) {
+            $signature_data[] = json_encode($params);
+        }
 
         $signature_string = implode('', $signature_data);
 
@@ -274,7 +274,6 @@ class coinpayments_api
      * @param null $params
      * @param null $client_secret
      * @return bool|mixed
-     * @throws Exception
      */
     protected function sendRequest($method, $api_action, $client_id, $params = null, $client_secret = null)
     {
@@ -299,7 +298,7 @@ class coinpayments_api
             if ($client_secret) {
                 $signature = $this->createSignature($method, $api_url, $client_id, $date, $client_secret, $params);
                 $headers[] = 'X-CoinPayments-Client: ' . $client_id;
-                $headers[] = 'X-CoinPayments-Timestamp: ' . $date->format('c');
+                $headers[] = 'X-CoinPayments-Timestamp: ' . $date->format('Y-m-d\TH:i:s');
                 $headers[] = 'X-CoinPayments-Signature: ' . $signature;
 
             }
@@ -317,16 +316,15 @@ class coinpayments_api
 
             curl_setopt_array($curl, $options);
 
-            $response = json_decode(curl_exec($curl), true);
+            $response = curl_exec($curl);
+            $response = json_decode($response, true);
 
             curl_close($curl);
 
         } catch (Exception $e) {
 
         }
+
         return $response;
     }
-
 }
-
-?>

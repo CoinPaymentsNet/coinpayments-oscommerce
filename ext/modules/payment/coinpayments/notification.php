@@ -31,21 +31,20 @@ if (
 ) {
 
 
-    require_once 'includes/modules/payment/coinpayments/coinpayments_api.php';
-    $api = new coinpayments_api();
+    require_once 'lib/common/modules/orderPayment/lib/CoinPayments/ApiHelper.php';
+    $api = new \CoinPayments\ApiHelper();
     $signature = $_SERVER['HTTP_X_COINPAYMENTS_SIGNATURE'];
     $content = file_get_contents('php://input');
     $request_data = json_decode($content, true);
 
-    if ($api->checkDataSignature($signature, $content, $request_data['invoice']['status']) && isset($request_data['invoice']['invoiceId'])) {
+    if ($api->checkDataSignature($signature, $content, $request_data['invoice']['state']) && isset($request_data['invoice']['invoice_id'])) {
 //
-        $invoice_str = $request_data['invoice']['invoiceId'];
+        $invoice_str = $request_data['invoice']['invoice_id'];
         $invoice_str = explode('|', $invoice_str);
         $host_hash = array_shift($invoice_str);
         $invoice_id = array_shift($invoice_str);
 
         if ($host_hash == md5(tep_href_link('index.php', '', 'SSL', false, false))) {
-            $display_value = $request_data['invoice']['amount']['displayValue'];
             $trans_id = $request_data['invoice']['id'];
 
             $order_query = tep_db_query("select orders_status, currency, currency_value from " . TABLE_ORDERS . " where orders_id = '" . $invoice_id . "'");
@@ -53,15 +52,14 @@ if (
                 $report = false;
                 $order = tep_db_fetch_array($order_query);
                 if ($order) {
-                    $status = $request_data['invoice']['status'];
-                    if ($status == coinpayments_api::PAID_EVENT) {
-
+                    $status = $request_data['invoice']['state'];
+                    if ($status == \CoinPayments\ApiHelper::PAID_EVENT) {
                         $total_query = tep_db_query("select value from " . TABLE_ORDERS_TOTAL . " where orders_id = '" . (int)$invoice_id . "' and class = 'ot_total' limit 1");
                         $total = tep_db_fetch_array($total_query);
 
                         $comment_status = $status;
                         $comment_status .= ' (transaction ID: ' . $trans_id . ')';
-                        $comment_status .= '; (' . sprintf("%.08f", $request_data['invoice']['amount']['displayValue']) . ' ' . $request_data['invoice']['amount']['currency'] . ')';
+                        $comment_status .= '; (' . sprintf("%.08f", $request_data['invoice']['amount']['total']) . ' ' . $request_data['invoice']['amount']['currency'] . ')';
 
                         $new_status = MODULE_PAYMENT_COINPAYMENTS_ORDER_STATUS_ID > 0 ? (int)MODULE_PAYMENT_COINPAYMENTS_ORDER_STATUS_ID : (int)DEFAULT_ORDERS_STATUS_ID;
 
