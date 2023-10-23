@@ -6,7 +6,7 @@ use Exception;
 
 class ApiHelper
 {
-    const API_URL = 'https://api-staging.coinpaymints.com';
+    const API_URL = 'https://api.coinpaymints.com';
     const CHECKOUT_URL = 'https://checkout.coinpayments.net';
     const API_VERSION = '1';
 
