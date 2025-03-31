@@ -1,3 +1,5 @@
+> NOTICE: Migrated to [CoinPaymentsNet/plugin-oscommerce](https://github.com/CoinPaymentsNet/plugin-oscommerce).
+
 IMPORTANT NOTE:
 
 This is only for use with: https://alpha.coinpayments.net/
